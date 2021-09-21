@@ -2,46 +2,30 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 
 const mainFunc = async () => {
 
-  const request1 = async () => {
-    const file = await fetch('http://localhost:3000/file1', {
+  const requestFile = async (fileNum) => {
+    const file = await fetch(`http://localhost:3000/file${fileNum}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       }
     })
     const bf = await file.buffer()
-
-    return bf.toString()
+    const string = bf.toString()
+    const arraySymbols = string.split('\r').join('').split('\n').join('').split('=').join('').split('')
+    return arraySymbols
   }
 
-  const request2 = async () => {
-    const file = await fetch('http://localhost:3000/file2',{
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    const bf = await file.buffer()
-
-    return bf.toString()
-  }
-
-  const[str1, str2] = await Promise.all([
-    await request1(),
-    await request2(),
+  const[arrString1, arrString2] = await Promise.all([
+    await requestFile(1),
+    await requestFile(2),
   ])
-  console.log("str2",str2)
-   const arrString1 = str1.split('\r').join('').split('\n').join('').split('=').join('').split('')
-   const arrString2 = str2.split('\r').join('').split('\n').join('').split('=').join('').split('')
-  console.log("arr2", arrString2)
-
 
   const conversionFunction = (transformArray) => {
-
     let arrStr = []
     let arrNum = []
     let counter = 0
     let counterNum = 0
+
     transformArray.forEach((el)=> {
       if(isNaN((Number(el)))) {
         counter +=1
@@ -86,13 +70,36 @@ const mainFunc = async () => {
         Obj[arrStr[i]] = +arrNum[i]
       }
     }
+
     return Obj
   }
   const Obj1 = conversionFunction(arrString1)
   const Obj2 = conversionFunction(arrString2)
   console.log("Obj1", Obj1)
-
   console.log("Obj2", Obj2)
+
+  const result = {};
+
+  Object.keys(Obj1)
+    .forEach(key => result[key] = Obj1[key]);
+
+  Object.keys(Obj2)
+    .forEach((key) => {
+
+      let counter = 0
+      for (let j in result) {
+
+        if (j === key) {
+          counter = result[key] + Obj2[key]
+        }
+      }
+      if(counter) {
+        result[key] = counter
+      } else {
+        result[key] = Obj2[key]
+      }
+    })
+  console.log("Result", result)
 }
 
 
